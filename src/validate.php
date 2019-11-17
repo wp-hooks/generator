@@ -1,6 +1,6 @@
 <?php
 
-namespace JohnBillion\WPHooks;
+namespace JohnBillion\WPHooksGenerator;
 
 require_once 'vendor/autoload.php';
 
