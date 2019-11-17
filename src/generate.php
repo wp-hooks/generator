@@ -4,7 +4,21 @@ namespace JohnBillion\WPHooks;
 
 require_once 'vendor/autoload.php';
 
-list( , $source_dir, $target_dir ) = $argv;
+$options = getopt( '', [
+    "input:",
+    "output:",
+] );
+
+if ( empty( $options['input' ] ) || empty( $options['output'] ) ) {
+	printf(
+		"Usage: %s --input=src --output=hooks \n",
+		$argv[0]
+	);
+	exit( 1 );
+}
+
+$source_dir = $options['intput'];
+$target_dir = $options['output'];
 
 if ( ! file_exists( $target_dir ) ) {
 	printf(
