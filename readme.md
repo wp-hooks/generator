@@ -17,12 +17,12 @@ Note: If you just want the built hook files, use the following packages instead:
 * Actions can be found in [`hooks/actions.json`](hooks/actions.json).
 * Filters can be found in [`hooks/filters.json`](hooks/filters.json).
 
-## Usage in PHP
+## Usage of the Generated Hook Files in PHP
 
 ```php
 // Get hooks as JSON:
-$actions_json = file_get_contents( 'vendor/johnbillion/wp-hooks/hooks/actions.json' );
-$filters_json = file_get_contents( 'vendor/johnbillion/wp-hooks/hooks/filters.json' );
+$actions_json = file_get_contents( 'hook/actions.json' );
+$filters_json = file_get_contents( 'hook/filters.json' );
 
 // Get hooks as PHP:
 $actions = json_decode( $actions_json, true );
@@ -37,12 +37,12 @@ $results = array_filter( $filters, function( array $hook ) use ( $search ) {
 var_dump( $results );
 ```
 
-## Usage in JavaScript
+## Usage of the Generated Hook Files in JavaScript
 
 ```js
 // Get hooks as array of objects:
-const actions = require('@johnbillion/wp-hooks/hooks/actions.json');
-const filters = require('@johnbillion/wp-hooks/hooks/filters.json');
+const actions = require('hooks/actions.json');
+const filters = require('hooks/filters.json');
 
 // Search for actions matching a string:
 const search = 'menu';
@@ -51,17 +51,17 @@ const results = actions.filter( hook => ( null !== hook.name.match( search ) ) )
 console.log(results);
 ```
 
-## TypeScript Interfaces
+## TypeScript Interfaces for the Hook Files
 
-The TypeScript interfaces can be found in [`interface/index.d.ts`](interface/index.d.ts). Usage:
+The TypeScript interfaces for the hook files can be found in [`interface/index.d.ts`](interface/index.d.ts). Usage:
 
 ```typescript
 import { Hooks, Hook, Doc, Tags, Tag } from '@johnbillion/wp-hooks/interface';
 ```
 
-## JSON Schema
+## JSON Schema for the Hook Files
 
-The JSON schema can be found in [`schema.json`](schema.json).
+The JSON schema for the hook files can be found in [`schema.json`](schema.json).
 
 ## Implementation Details
 

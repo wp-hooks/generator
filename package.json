@@ -7,15 +7,6 @@
     "type": "git",
     "url": "git+https://github.com/johnbillion/wp-hooks-generator.git"
   },
-  "keywords": [
-    "wordpress"
-  ],
-  "files": [
-    "hooks",
-    "interface",
-    "readme.md",
-    "schema.json"
-  ],
   "author": "John Blackbourn",
   "license": "GPL-3.0-or-later",
   "bugs": {

@@ -42,8 +42,10 @@
         "validate-files": "Validates the generated files against the schema",
         "validate-from": "Validates a given file against the schema"
     },
+    "require": {
+        "php": ">=7"
+    },
     "require-dev": {
-        "php": ">=7",
         "oomphinc/composer-installers-extender": "^1.1",
         "opis/json-schema": "^1",
         "roots/wordpress": "dev-nightly",
