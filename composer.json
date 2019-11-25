@@ -42,6 +42,9 @@
         "validate-files": "Validates the generated files against the schema",
         "validate-from": "Validates a given file against the schema"
     },
+    "bin": [
+        "bin/wp-hooks-generator"
+    ],
     "require": {
         "php": ">=7"
     },

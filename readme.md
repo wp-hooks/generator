@@ -12,10 +12,9 @@ Note: If you just want the built hook files, use the following packages instead:
 
 `composer require johnbillion/wp-hooks-generator`
 
-## Actions and Filters
+## Generating the Hook Files
 
-* Actions can be found in [`hooks/actions.json`](hooks/actions.json).
-* Filters can be found in [`hooks/filters.json`](hooks/filters.json).
+`./vendor/bin/wp-hooks-generator --input=src --output=hooks`
 
 ## Usage of the Generated Hook Files in PHP
 
