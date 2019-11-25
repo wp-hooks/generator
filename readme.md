@@ -50,30 +50,33 @@ const results = actions.filter( hook => ( null !== hook.name.match( search ) ) )
 console.log(results);
 ```
 
+## Ignoring Files or Directories
+
+You can ignore files or directories in two ways.
+
+### On the Command Line
+
+`./vendor/bin/wp-hooks-generator --input=src --output=hooks --ignore=ignore/this,ignore/that`
+
+### In composer.json
+
+```json
+"extra": {
+    "wp-hooks-ignore": [
+        "ignore/this",
+        "ignore/that"
+    ]
+}
+```
+
 ## TypeScript Interfaces for the Hook Files
 
 The TypeScript interfaces for the hook files can be found in [`interface/index.d.ts`](interface/index.d.ts). Usage:
 
 ```typescript
-import { Hooks, Hook, Doc, Tags, Tag } from '@johnbillion/wp-hooks/interface';
+import { Hooks, Hook, Doc, Tags, Tag } from 'hooks/index.d.ts';
 ```
 
 ## JSON Schema for the Hook Files
 
 The JSON schema for the hook files can be found in [`schema.json`](schema.json).
-
-## Implementation Details
-
-The hook extraction component of the [WP Parser library](https://github.com/WordPress/phpdoc-parser) is used to scan files in order to generate the hook data. WordPress nightly is used so hooks are always up to date.
-
-## Regenerating the Hook Files
-
-`composer generate`
-
-## Validating the Hook Files
-
-`composer validate-files`
-
-## Regenerating the TypeScript Interfaces
-
-`npm run generate-interfaces`
