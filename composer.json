@@ -48,12 +48,10 @@
     "require-dev": {
         "oomphinc/composer-installers-extender": "^1.1",
         "opis/json-schema": "^1",
-        "roots/wordpress": "dev-nightly",
         "wordpress/phpdoc-parser": "dev-master"
     },
     "minimum-stability": "dev",
 	"extra": {
-        "wordpress-install-dir": "vendor/wordpress/wordpress",
         "installer-paths": {
             "vendor/wordpress/{$name}/": [
                 "wordpress/phpdoc-parser"
