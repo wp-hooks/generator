@@ -2,9 +2,7 @@
 
 Generates a list of WordPress actions and filters from code and outputs them in machine-readable JSON format. Can be used with WordPress plugins, themes, and core.
 
-**Note:** This is still a work in progress. The code that generates the actions and filters data is not yet finalised.
-
-Note: If you just want the built hook files, use the following packages instead:
+Note: If you just want the hook files without generating them yourself, use the following packages instead:
 
 * [`johnbillion/wp-hooks`](https://github.com/johnbillion/wp-hooks) for WordPress core
 
