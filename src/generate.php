@@ -21,6 +21,14 @@ if ( empty( $options['input' ] ) || empty( $options['output'] ) ) {
 $source_dir = $options['input'];
 $target_dir = $options['output'];
 
+if ( ! file_exists( $source_dir ) ) {
+	printf(
+		'The source directory "%s" does not exist.' . "\n",
+		$source_dir
+	);
+	exit( 1 );
+}
+
 if ( ! file_exists( $target_dir ) ) {
 	printf(
 		'The target directory "%s" does not exist. Please create it first.' . "\n",
