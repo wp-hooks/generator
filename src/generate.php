@@ -17,7 +17,7 @@ if ( empty( $options['input' ] ) || empty( $options['output'] ) ) {
 	exit( 1 );
 }
 
-$source_dir = $options['intput'];
+$source_dir = $options['input'];
 $target_dir = $options['output'];
 
 if ( ! file_exists( $target_dir ) ) {
