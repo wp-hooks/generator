@@ -16,12 +16,12 @@
         "bin/wp-hooks-generator"
     ],
     "require": {
-        "php": ">=7"
+        "php": ">=7",
+        "wordpress/phpdoc-parser": "dev-master"
     },
     "require-dev": {
         "oomphinc/composer-installers-extender": "^1.1",
-        "opis/json-schema": "^1",
-        "wordpress/phpdoc-parser": "dev-master"
+        "opis/json-schema": "^1"
     },
     "minimum-stability": "dev",
 	"extra": {
