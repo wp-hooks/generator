@@ -8,18 +8,38 @@ require_once 'vendor/autoload.php';
 $options = getopt( '', [
     "input:",
     "output:",
+    "ignore::",
 ] );
 
 if ( empty( $options['input' ] ) || empty( $options['output'] ) ) {
 	printf(
-		"Usage: %s --input=src --output=hooks \n",
+		"Usage: %s --input=src --output=hooks [--ignore=ignore/this,ignore/that] \n",
 		$argv[0]
 	);
 	exit( 1 );
 }
 
+// Read ignore from cli args:
+if ( ! empty( $options['ignore'] ) ) {
+	$options['ignore'] = explode( ',', $options['ignore'] );
+}
+
+// Read ignore from Composer config:
+if ( empty( $options['ignore'] ) && file_exists( 'composer.json' ) ) {
+	$config = json_decode( file_get_contents( 'composer.json' ) );
+
+	if ( ! empty( $config->extra ) && ! empty( $config->extra->{"wp-hooks-ignore"} ) ) {
+		$options['ignore'] = array_values( $config->extra->{"wp-hooks-ignore"} );
+	}
+}
+
+if ( empty( $options['ignore'] ) ) {
+	$options['ignore'] = [];
+}
+
 $source_dir = $options['input'];
 $target_dir = $options['output'];
+$ignore     = $options['ignore'];
 
 if ( ! file_exists( $source_dir ) ) {
 	printf(
@@ -40,6 +60,15 @@ if ( ! file_exists( $target_dir ) ) {
 echo "Scanning for files...\n";
 
 $files = \WP_Parser\get_wp_files( $source_dir );
+$files = array_values( array_filter( $files, function( string $file ) use ( $source_dir, $ignore ) : bool {
+	foreach ( $ignore as $i ) {
+		if ( false !== strpos( $file, $i ) ) {
+			return false;
+		}
+	}
+
+	return true;
+} ) );
 
 printf(
 	"Found %d files. Parsing hooks...\n",
