@@ -9,11 +9,12 @@ $options = getopt( '', [
     "input:",
     "output:",
     "ignore-files::",
+    "ignore-hooks::",
 ] );
 
 if ( empty( $options['input' ] ) || empty( $options['output'] ) ) {
 	printf(
-		"Usage: %s --input=src --output=hooks [--ignore-files=ignore/this,ignore/that] \n",
+		"Usage: %s --input=src --output=hooks [--ignore-files=ignore/this,ignore/that] [--ignore-hooks=this_hook,that_hook] \n",
 		$argv[0]
 	);
 	exit( 1 );
@@ -24,12 +25,22 @@ if ( ! empty( $options['ignore-files'] ) ) {
 	$options['ignore-files'] = explode( ',', $options['ignore-files'] );
 }
 
-// Read ignore-files from Composer config:
-if ( empty( $options['ignore-files'] ) && file_exists( 'composer.json' ) ) {
-	$config = json_decode( file_get_contents( 'composer.json' ) );
+// Read ignore-hooks from cli args:
+if ( ! empty( $options['ignore-hooks'] ) ) {
+	$options['ignore-hooks'] = explode( ',', $options['ignore-hooks'] );
+}
 
-	if ( ! empty( $config->extra ) && ! empty( $config->extra->{"wp-hooks"} ) && ! empty( $config->extra->{"wp-hooks"}->{"ignore-files"} ) ) {
+$config = ( file_exists( 'composer.json' ) ? json_decode( file_get_contents( 'composer.json' ) ) : false );
+
+if ( ! empty( $config ) && ! empty( $config->extra ) && ! empty( $config->extra->{"wp-hooks"} ) ) {
+	// Read ignore-files from Composer config:
+	if ( empty( $options['ignore-files'] ) && ! empty( $config->extra->{"wp-hooks"}->{"ignore-files"} ) ) {
 		$options['ignore-files'] = array_values( $config->extra->{"wp-hooks"}->{"ignore-files"} );
+	}
+
+	// Read ignore-hooks from Composer config:
+	if ( empty( $options['ignore-hooks'] ) && ! empty( $config->extra->{"wp-hooks"}->{"ignore-hooks"} ) ) {
+		$options['ignore-hooks'] = array_values( $config->extra->{"wp-hooks"}->{"ignore-hooks"} );
 	}
 }
 
@@ -37,9 +48,14 @@ if ( empty( $options['ignore-files'] ) ) {
 	$options['ignore-files'] = [];
 }
 
+if ( empty( $options['ignore-hooks'] ) ) {
+	$options['ignore-hooks'] = [];
+}
+
 $source_dir = $options['input'];
 $target_dir = $options['output'];
 $ignore_files = $options['ignore-files'];
+$ignore_hooks = $options['ignore-hooks'];
 
 if ( ! file_exists( $source_dir ) ) {
 	printf(
@@ -75,7 +91,7 @@ printf(
 	count( $files )
 );
 
-function hooks_parse_files( $files, $root ) : array {
+function hooks_parse_files( $files, $root, $ignore_hooks ) : array {
 	$output = array();
 
 	foreach ( $files as $filename ) {
@@ -107,7 +123,7 @@ function hooks_parse_files( $files, $root ) : array {
 		$output = array_merge( $output, $file_hooks );
 	}
 
-	$output = array_filter( $output, function( array $hook ) : bool {
+	$output = array_filter( $output, function( array $hook ) use ( $ignore_hooks ) : bool {
 		if ( ! empty( $hook['doc'] ) && ! empty( $hook['doc']['description'] ) ) {
 			if ( 0 === strpos( $hook['doc']['description'], 'This filter is documented in ' ) ) {
 				return false;
@@ -116,21 +132,6 @@ function hooks_parse_files( $files, $root ) : array {
 				return false;
 			}
 		}
-
-		// Special case hooks to ignore.
-		$ignore_hooks = [
-			// Present in core for back-compat:
-			'load-categories.php',
-			'load-edit-link-categories.php',
-			'load-edit-tags.php',
-			'load-page-new.php',
-			'load-page.php',
-			'option_enable_xmlrpc',
-			'pre_option_enable_xmlrpc',
-
-			// Present in do_action_deprecated() and apply_filters_deprecated():
-			'{$tag}',
-		];
 
 		if ( in_array( $hook['name'], $ignore_hooks, true ) ) {
 			return false;
@@ -180,7 +181,7 @@ function export_hooks( array $hooks, string $path ) {
 	return $out;
 }
 
-$output = hooks_parse_files( $files, $source_dir );
+$output = hooks_parse_files( $files, $source_dir, $ignore_hooks );
 
 // Actions
 $actions = array_values( array_filter( $output, function( array $hook ) : bool {
