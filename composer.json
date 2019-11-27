@@ -17,18 +17,10 @@
     ],
     "require": {
         "php": ">=7",
-        "wordpress/phpdoc-parser": "dev-master"
+        "johnbillion/wp-parser-lib": "^1"
     },
     "require-dev": {
         "oomphinc/composer-installers-extender": "^1.1",
         "opis/json-schema": "^1"
-    },
-    "minimum-stability": "dev",
-	"extra": {
-        "installer-paths": {
-            "vendor/wordpress/{$name}/": [
-                "wordpress/phpdoc-parser"
-            ]
-        }
-	}
+    }
 }
