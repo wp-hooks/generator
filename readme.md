@@ -1,6 +1,6 @@
 # wp-hooks-generator
 
-Generates a list of WordPress actions and filters from code and outputs them in machine-readable JSON format. Can be used with WordPress plugins, themes, and core.
+Generates a JSON representation of the WordPress actions and filters in your code. Can be used with WordPress plugins, themes, and core.
 
 Note: If you just want the hook files without generating them yourself, use the following packages instead:
 
