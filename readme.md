@@ -50,20 +50,22 @@ console.log(results);
 
 ## Ignoring Files or Directories
 
-You can ignore files or directories in two ways.
+You can ignore files or directories in two ways:
 
 ### On the Command Line
 
-`./vendor/bin/wp-hooks-generator --input=src --output=hooks --ignore=ignore/this,ignore/that`
+`./vendor/bin/wp-hooks-generator --input=src --output=hooks --ignore-files="ignore/this,ignore/that"`
 
 ### In composer.json
 
 ```json
 "extra": {
-    "wp-hooks-ignore": [
-        "ignore/this",
-        "ignore/that"
-    ]
+    "wp-hooks": {
+        "ignore-files": [
+            "ignore/this",
+            "ignore/that"
+        ]
+    }
 }
 ```
 

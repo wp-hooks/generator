@@ -8,38 +8,38 @@ require_once 'vendor/autoload.php';
 $options = getopt( '', [
     "input:",
     "output:",
-    "ignore::",
+    "ignore-files::",
 ] );
 
 if ( empty( $options['input' ] ) || empty( $options['output'] ) ) {
 	printf(
-		"Usage: %s --input=src --output=hooks [--ignore=ignore/this,ignore/that] \n",
+		"Usage: %s --input=src --output=hooks [--ignore-files=ignore/this,ignore/that] \n",
 		$argv[0]
 	);
 	exit( 1 );
 }
 
-// Read ignore from cli args:
-if ( ! empty( $options['ignore'] ) ) {
-	$options['ignore'] = explode( ',', $options['ignore'] );
+// Read ignore-files from cli args:
+if ( ! empty( $options['ignore-files'] ) ) {
+	$options['ignore-files'] = explode( ',', $options['ignore-files'] );
 }
 
-// Read ignore from Composer config:
-if ( empty( $options['ignore'] ) && file_exists( 'composer.json' ) ) {
+// Read ignore-files from Composer config:
+if ( empty( $options['ignore-files'] ) && file_exists( 'composer.json' ) ) {
 	$config = json_decode( file_get_contents( 'composer.json' ) );
 
-	if ( ! empty( $config->extra ) && ! empty( $config->extra->{"wp-hooks-ignore"} ) ) {
-		$options['ignore'] = array_values( $config->extra->{"wp-hooks-ignore"} );
+	if ( ! empty( $config->extra ) && ! empty( $config->extra->{"wp-hooks"} ) && ! empty( $config->extra->{"wp-hooks"}->{"ignore-files"} ) ) {
+		$options['ignore-files'] = array_values( $config->extra->{"wp-hooks"}->{"ignore-files"} );
 	}
 }
 
-if ( empty( $options['ignore'] ) ) {
-	$options['ignore'] = [];
+if ( empty( $options['ignore-files'] ) ) {
+	$options['ignore-files'] = [];
 }
 
 $source_dir = $options['input'];
 $target_dir = $options['output'];
-$ignore     = $options['ignore'];
+$ignore_files = $options['ignore-files'];
 
 if ( ! file_exists( $source_dir ) ) {
 	printf(
@@ -60,8 +60,8 @@ if ( ! file_exists( $target_dir ) ) {
 echo "Scanning for files...\n";
 
 $files = \WP_Parser\get_wp_files( $source_dir );
-$files = array_values( array_filter( $files, function( string $file ) use ( $source_dir, $ignore ) : bool {
-	foreach ( $ignore as $i ) {
+$files = array_values( array_filter( $files, function( string $file ) use ( $ignore_files ) : bool {
+	foreach ( $ignore_files as $i ) {
 		if ( false !== strpos( $file, $i ) ) {
 			return false;
 		}
