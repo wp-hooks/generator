@@ -171,8 +171,6 @@ function export_hooks( array $hooks, string $path ) {
 		$out[] = array(
 			'name'     => $hook->getName(),
 			'file'     => $path,
-			'line'     => $hook->getLineNumber(),
-			'end_line' => $hook->getNode()->getAttribute( 'endLine' ),
 			'type'     => $hook->getType(),
 			'doc'      => $doc,
 		);
