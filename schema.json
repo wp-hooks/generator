@@ -1,6 +1,21 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"$id": "http://example.com/wp-hooks.json",
+	"title": "HooksContainer",
+	"description": "The container for the list of hooks",
+	"type": "object",
+	"required": [
+		"$schema",
+		"hooks"
+	],
+	"additionalProperties": false,
+	"properties": {
+		"$schema": {
+			"type": "string",
+			"description": "The JSON schema to verify a hook document against",
+			"format": "uri"
+		},
+		"hooks": {
 	"type": "array",
 	"title": "Hooks",
 	"description": "The list of hooks",
@@ -143,6 +158,8 @@
 					}
 				}
 			}
+		}
+	}
 		}
 	}
 }

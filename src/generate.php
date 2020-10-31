@@ -186,12 +186,22 @@ $actions = array_values( array_filter( $output, function( array $hook ) : bool {
 	return in_array( $hook['type'], [ 'action', 'action_reference' ], true );
 } ) );
 
+$actions = [
+	'$schema' => 'https://raw.githubusercontent.com/johnbillion/wp-hooks-generator/master/schema.json',
+	'hooks' => $actions,
+];
+
 $result = file_put_contents( $target_dir . '/actions.json', json_encode( $actions, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
 
 // Filters
 $filters = array_values( array_filter( $output, function( array $hook ) : bool {
 	return in_array( $hook['type'], [ 'filter', 'filter_reference' ], true );
 } ) );
+
+$filters = [
+	'$schema' => 'https://raw.githubusercontent.com/johnbillion/wp-hooks-generator/master/schema.json',
+	'hooks' => $filters,
+];
 
 $result = file_put_contents( $target_dir . '/filters.json', json_encode( $filters, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
 

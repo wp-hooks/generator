@@ -15,6 +15,16 @@ export type Tags = Tag[];
 export type Hooks = Hook[];
 
 /**
+ * The container for the list of hooks
+ */
+export interface HooksContainer {
+  /**
+   * The JSON schema to verify a hook document against
+   */
+  $schema: string;
+  hooks: Hooks;
+}
+/**
  * The hook representation
  */
 export interface Hook {
