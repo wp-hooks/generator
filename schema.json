@@ -119,6 +119,13 @@
 										"$option"
 									]
 								},
+								"refers": {
+									"description": "Related function to refer to, for @see tags",
+									"type": "string",
+									"examples": [
+										"wp_delete_post()"
+									]
+								},
 								"description": {
 									"description": "This is only used for @since 3.0.0 MU tags",
 									"type": "string"

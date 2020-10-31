@@ -71,6 +71,10 @@ export interface Tag {
    */
   variable?: string;
   /**
+   * Related function to refer to, for @see tags
+   */
+  refers?: string;
+  /**
    * This is only used for @since 3.0.0 MU tags
    */
   description?: string;
