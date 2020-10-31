@@ -119,6 +119,14 @@
 										"$option"
 									]
 								},
+								"link": {
+									"description": "A link to more information, for @link tags",
+									"type": "string",
+									"format": "uri",
+									"examples": [
+										"https://core.trac.wordpress.org/ticket/19321"
+									]
+								},
 								"refers": {
 									"description": "Related function to refer to, for @see tags",
 									"type": "string",

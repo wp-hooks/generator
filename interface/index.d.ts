@@ -71,6 +71,10 @@ export interface Tag {
    */
   variable?: string;
   /**
+   * A link to more information, for @link tags
+   */
+  link?: string;
+  /**
    * Related function to refer to, for @see tags
    */
   refers?: string;
