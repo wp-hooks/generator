@@ -12,7 +12,7 @@ Note: If you just want the hook files without generating them yourself, use the 
 
 ## Generating the Hook Files
 
-`./vendor/bin/wp-hooks-generator --input=src --output=hooks`
+`./bin/wp-hooks-generator --input=src --output=hooks`
 
 ## Usage of the Generated Hook Files in PHP
 
