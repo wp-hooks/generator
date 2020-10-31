@@ -31,7 +31,6 @@ export interface Hook {
    */
   type: string;
   doc: Doc;
-  [k: string]: any;
 }
 /**
  * The docblock information for the hook
@@ -50,7 +49,6 @@ export interface Doc {
    */
   long_description_html: string;
   tags: Tags;
-  [k: string]: any;
 }
 /**
  * The docblock tags information for the hook
@@ -76,5 +74,4 @@ export interface Tag {
    * This is only used for @since 3.0.0 MU tags
    */
   description?: string;
-  [k: string]: any;
 }

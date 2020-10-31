@@ -8,6 +8,7 @@
 		"title": "Hook",
 		"description": "The hook representation",
 		"type": "object",
+		"additionalProperties": false,
 		"required": [
 			"name",
 			"file",
@@ -45,6 +46,7 @@
 				"title": "Doc",
 				"description": "The docblock information for the hook",
 				"type": "object",
+				"additionalProperties": false,
 				"required": [
 					"description",
 					"long_description",
@@ -72,6 +74,7 @@
 							"title": "Tag",
 							"description": "The docblock tags information for the hook",
 							"type": "object",
+							"additionalProperties": false,
 							"required": [
 								"name",
 								"content"
