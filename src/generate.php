@@ -148,8 +148,8 @@ function hooks_parse_files( $files, $root, $ignore_hooks ) : array {
 }
 
 /**
- * @param Hook_Reflector[] $hooks Array of hook references.
- * @param string           $path  The file path.
+ * @param \WP_Parser\Hook_Reflector[] $hooks Array of hook references.
+ * @param string                      $path  The file path.
  *
  * @return array
  */
