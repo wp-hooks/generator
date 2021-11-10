@@ -20,7 +20,7 @@
         "johnbillion/wp-parser-lib": "^1"
     },
     "require-dev": {
-        "oomphinc/composer-installers-extender": "^1.1",
+        "oomphinc/composer-installers-extender": "^2",
         "opis/json-schema": "^1"
     }
 }
