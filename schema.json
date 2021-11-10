@@ -28,7 +28,8 @@
 					"name",
 					"file",
 					"type",
-					"doc"
+					"doc",
+					"args"
 				],
 				"properties": {
 					"name": {
@@ -157,6 +158,10 @@
 								}
 							}
 						}
+					},
+					"args": {
+						"description": "The number of arguments passed to the hook",
+						"type": "integer"
 					}
 				}
 			}

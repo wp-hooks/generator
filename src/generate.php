@@ -173,6 +173,7 @@ function export_hooks( array $hooks, string $path ) {
 			'file'     => $path,
 			'type'     => $hook->getType(),
 			'doc'      => $doc,
+			'args'     => count( $hook->getNode()->args ) - 1,
 		);
 	}
 
