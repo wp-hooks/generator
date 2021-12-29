@@ -6,7 +6,7 @@ namespace JohnBillion\WPHooksGenerator;
 require_once 'vendor/autoload.php';
 
 use Opis\JsonSchema\{
-    Validator, ValidationResult, ValidationError, Schema
+	Validator, ValidationResult, ValidationError, Schema
 };
 
 $data = json_decode(file_get_contents( $argv[1] ));
@@ -18,11 +18,11 @@ $validator = new Validator();
 $result = $validator->schemaValidation($data, $schema);
 
 if ($result->isValid()) {
-    echo '$data is valid', PHP_EOL;
+	echo '$data is valid', PHP_EOL;
 } else {
-    /** @var ValidationError $error */
-    $error = $result->getFirstError();
-    echo '$data is invalid', PHP_EOL;
-    echo "Error: ", $error->keyword(), PHP_EOL;
-    echo json_encode($error->keywordArgs(), JSON_PRETTY_PRINT), PHP_EOL;
+	/** @var ValidationError $error */
+	$error = $result->getFirstError();
+	echo '$data is invalid', PHP_EOL;
+	echo "Error: ", $error->keyword(), PHP_EOL;
+	echo json_encode($error->keywordArgs(), JSON_PRETTY_PRINT), PHP_EOL;
 }

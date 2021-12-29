@@ -6,10 +6,10 @@ namespace JohnBillion\WPHooksGenerator;
 require_once 'vendor/autoload.php';
 
 $options = getopt( '', [
-    "input:",
-    "output:",
-    "ignore-files::",
-    "ignore-hooks::",
+	"input:",
+	"output:",
+	"ignore-files::",
+	"ignore-hooks::",
 ] );
 
 if ( empty( $options['input' ] ) || empty( $options['output'] ) ) {
