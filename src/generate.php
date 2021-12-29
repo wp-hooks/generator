@@ -171,6 +171,18 @@ function export_hooks( array $hooks, string $path ) : array {
 
 		if ( $docblock ) {
 			$doc['long_description'] = \WP_Parser\fix_newlines( $docblock->getLongDescription() );
+			$doc['long_description'] = str_replace(
+				'  - ',
+				"\n  - ",
+				$doc['long_description']
+			);
+			$doc['long_description'] = preg_replace_callback(
+				'# ([1-9])\. #',
+				function( array $matches ) : string {
+					return "\n {$matches[1]}. ";
+				},
+				$doc['long_description']
+			);
 		} else {
 			$doc['long_description'] = '';
 		}
