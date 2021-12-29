@@ -4,15 +4,15 @@ Generates a JSON representation of the WordPress actions and filters in your cod
 
 Note: If you just want the hook files without generating them yourself, use the following packages instead:
 
-* [`johnbillion/wp-hooks`](https://github.com/johnbillion/wp-hooks) for WordPress core
+* [johnbillion/wp-hooks](https://github.com/johnbillion/wp-hooks) for WordPress core
 
 ## Installation
 
-`composer require johnbillion/wp-hooks-generator`
+    composer require johnbillion/wp-hooks-generator
 
 ## Generating the Hook Files
 
-`./bin/wp-hooks-generator --input=src --output=hooks`
+    ./bin/wp-hooks-generator --input=src --output=hooks
 
 ## Usage of the Generated Hook Files in PHP
 
@@ -21,7 +21,7 @@ Note: If you just want the hook files without generating them yourself, use the 
 $actions_json = file_get_contents( 'hook/actions.json' );
 $filters_json = file_get_contents( 'hook/filters.json' );
 
-// Get hooks as PHP:
+// Convert hooks to PHP:
 $actions = json_decode( $actions_json, true )['hooks'];
 $filters = json_decode( $filters_json, true )['hooks'];
 
@@ -54,7 +54,7 @@ You can ignore files or directories in two ways:
 
 ### On the Command Line
 
-`./vendor/bin/wp-hooks-generator --input=src --output=hooks --ignore-files="ignore/this,ignore/that"`
+    ./vendor/bin/wp-hooks-generator --input=src --output=hooks --ignore-files="ignore/this,ignore/that"
 
 ### In composer.json
 
@@ -75,7 +75,7 @@ You can ignore hooks in two ways:
 
 ### On the Command Line
 
-`./vendor/bin/wp-hooks-generator --input=src --output=hooks --ignore-hooks="this_hook,that_hook"`
+    ./vendor/bin/wp-hooks-generator --input=src --output=hooks --ignore-hooks="this_hook,that_hook"
 
 ### In composer.json
 
