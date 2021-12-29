@@ -1,5 +1,6 @@
 #!/usr/bin/env php
 <?php
+declare(strict_types=1);
 
 namespace JohnBillion\WPHooksGenerator;
 
@@ -75,6 +76,7 @@ if ( ! file_exists( $target_dir ) ) {
 
 echo "Scanning for files...\n";
 
+/** @var array<int,string> */
 $files = \WP_Parser\get_wp_files( $source_dir );
 $files = array_values( array_filter( $files, function( string $file ) use ( $ignore_files ) : bool {
 	foreach ( $ignore_files as $i ) {
@@ -91,7 +93,13 @@ printf(
 	count( $files )
 );
 
-function hooks_parse_files( $files, $root, $ignore_hooks ) : array {
+/**
+ * @param array<int,string> $files
+ * @param string            $root
+ * @param array<int,string> $ignore_hooks
+ * @return array
+ */
+function hooks_parse_files( array $files, string $root, array $ignore_hooks ) : array {
 	$output = array();
 
 	foreach ( $files as $filename ) {
@@ -150,10 +158,9 @@ function hooks_parse_files( $files, $root, $ignore_hooks ) : array {
 /**
  * @param \WP_Parser\Hook_Reflector[] $hooks Array of hook references.
  * @param string                      $path  The file path.
- *
- * @return array
+ * @return array<int,array<string,mixed>>
  */
-function export_hooks( array $hooks, string $path ) {
+function export_hooks( array $hooks, string $path ) : array {
 	$out = array();
 
 	foreach ( $hooks as $hook ) {
