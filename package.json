@@ -1,6 +1,6 @@
 {
   "name": "@johnbillion/wp-hooks-generator",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Scans the WordPress actions and filters in your code and saves them as JSON.",
   "private": true,
   "repository": {
