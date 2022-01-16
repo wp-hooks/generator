@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace JohnBillion\WPHooksGenerator;
 
-require_once 'vendor/autoload.php';
+require_once file_exists( 'vendor/autoload.php' ) ? 'vendor/autoload.php' : dirname( __DIR__, 4 ) . '/vendor/autoload.php';
 
 $options = getopt( '', [
 	"input:",
