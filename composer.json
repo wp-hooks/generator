@@ -21,7 +21,7 @@
 	],
 	"require": {
 		"php": ">=7",
-		"johnbillion/wp-parser-lib": "^1"
+		"johnbillion/wp-parser-lib": "^1.2.0"
 	},
 	"require-dev": {
 		"oomphinc/composer-installers-extender": "^2",
