@@ -183,6 +183,26 @@ function export_hooks( array $hooks, string $path ) : array {
 				},
 				$doc['long_description']
 			);
+
+			foreach ( $docblock->getTags() as $i => $tag ) {
+				$content = '';
+
+				if ( method_exists( $tag, 'getVersion' ) ) {
+					$version = $tag->getVersion();
+					if ( ! empty( $version ) ) {
+						$content = $version;
+					}
+				} else {
+					$content = $tag->getDescription();
+					$content = \WP_Parser\format_description( preg_replace( '#\n\s+#', ' ', $content ) );
+				}
+
+				if ( empty( $content ) ) {
+					continue;
+				}
+
+				$doc['tags'][ $i ]['content'] = $content;
+			}
 		} else {
 			$doc['long_description'] = '';
 		}
