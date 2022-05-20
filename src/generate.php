@@ -113,8 +113,8 @@ function hooks_parse_files( array $files, string $root, array $ignore_hooks ) : 
 		$file->process();
 		$processing_errors = ob_get_clean();
 		if ( !empty( $processing_errors ) ) {
-			echo $filename . "\n";
-			echo $processing_errors . "\n";
+			fwrite( STDERR, $filename . PHP_EOL );
+			fwrite( STDERR, $processing_errors . PHP_EOL );
 		}
 
 		if ( ! empty( $file->uses['hooks'] ) ) {
