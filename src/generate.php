@@ -108,7 +108,14 @@ function hooks_parse_files( array $files, string $root, array $ignore_hooks ) : 
 		$path = ltrim( substr( $filename, strlen( $root ) ), DIRECTORY_SEPARATOR );
 		$file->setFilename( $path );
 
+		// should throw things, but for some reason returns errors instead, so we just collect them manually
+		ob_start();
 		$file->process();
+		$processing_errors = ob_get_clean();
+		if ( !empty( $processing_errors ) ) {
+			echo $filename . "\n";
+			echo $processing_errors . "\n";
+		}
 
 		if ( ! empty( $file->uses['hooks'] ) ) {
 			$file_hooks = array_merge( $file_hooks, export_hooks( $file->uses['hooks'], $path ) );
