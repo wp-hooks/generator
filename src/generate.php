@@ -103,6 +103,9 @@ function hooks_parse_files( array $files, string $root, array $ignore_hooks ) : 
 	$output = array();
 
 	foreach ( $files as $filename ) {
+		if ( !is_readable( $filename ) ) {
+			continue;
+		}
 		$file = new \WP_Parser\File_Reflector( $filename );
 		$file_hooks = [];
 		$path = ltrim( substr( $filename, strlen( $root ) ), DIRECTORY_SEPARATOR );
