@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace JohnBillion\WPHooksGenerator;
 
+use DOMDocument;
+
 require_once file_exists( 'vendor/autoload.php' ) ? 'vendor/autoload.php' : dirname( __DIR__, 4 ) . '/vendor/autoload.php';
 
 $options = getopt( '', [
@@ -217,16 +219,50 @@ function export_hooks( array $hooks, string $path ) : array {
 			$doc['long_description'] = '';
 		}
 
-		$out[] = array(
-			'name'     => $hook->getName(),
-			'file'     => $path,
-			'type'     => $hook->getType(),
-			'doc'      => $doc,
-			'args'     => count( $hook->getNode()->args ) - 1,
-		);
+		$aliases = parse_aliases( $doc['long_description_html'] );
+
+		$result = [];
+
+		$result['name'] = $hook->getName();
+
+		if ( $aliases ) {
+			$result['aliases'] = $aliases;
+		}
+
+		$result['file'] = $path;
+		$result['type'] = $hook->getType();
+		$result['doc'] = $doc;
+		$result['args'] = count( $hook->getNode()->args ) - 1;
+
+		$out[] = $result;
 	}
 
 	return $out;
+}
+
+/**
+ * @return array<int, string>
+ */
+function parse_aliases( string $html ) : array {
+	if ( false === strpos( $html, 'Possible hook names include' ) ) {
+		return [];
+	}
+
+	$aliases = [];
+
+	$html = explode( 'Possible hook names include', $html, 2 );
+	$html = explode( '</ul>', end( $html ) );
+
+	$dom = new DOMDocument();
+	$dom->loadHTML( reset( $html ) );
+
+	foreach ( $dom->getElementsByTagName( 'li' ) as $li ) {
+		$aliases[] = $li->nodeValue;
+	}
+
+	sort( $aliases );
+
+	return $aliases;
 }
 
 $output = hooks_parse_files( $files, $source_dir, $ignore_hooks );
