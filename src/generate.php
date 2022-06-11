@@ -199,12 +199,7 @@ function export_hooks( array $hooks, string $path ) : array {
 			foreach ( $docblock->getTags() as $i => $tag ) {
 				$content = '';
 
-				if ( method_exists( $tag, 'getVersion' ) ) {
-					$version = $tag->getVersion();
-					if ( ! empty( $version ) ) {
-						$content = $version;
-					}
-				} else {
+				if ( ! method_exists( $tag, 'getVersion' ) ) {
 					$content = $tag->getDescription();
 					$content = \WP_Parser\format_description( preg_replace( '#\n\s+#', ' ', $content ) );
 				}
