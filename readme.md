@@ -1,4 +1,4 @@
-# wp-hooks-generator
+# WP Hooks Generator
 
 Generates a JSON representation of the WordPress actions and filters in your code. Can be used with WordPress plugins, themes, and core.
 
@@ -14,14 +14,16 @@ composer require wp-hooks/generator
 
 ## Generating the Hook Files
 
-    ./bin/wp-hooks-generator --input=src --output=hooks
+```shell
+./bin/wp-hooks-generator --input=src --output=hooks
+```
 
 ## Usage of the Generated Hook Files in PHP
 
 ```php
 // Get hooks as JSON:
-$actions_json = file_get_contents( 'hook/actions.json' );
-$filters_json = file_get_contents( 'hook/filters.json' );
+$actions_json = file_get_contents( 'hooks/actions.json' );
+$filters_json = file_get_contents( 'hooks/filters.json' );
 
 // Convert hooks to PHP:
 $actions = json_decode( $actions_json, true )['hooks'];
