@@ -5,12 +5,12 @@
 	"private": true,
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/johnbillion/wp-hooks-generator.git"
+		"url": "git+https://github.com/wp-hooks/generator.git"
 	},
 	"author": "John Blackbourn",
 	"license": "GPL-3.0-or-later",
 	"bugs": {
-		"url": "https://github.com/johnbillion/wp-hooks-generator/issues"
+		"url": "https://github.com/wp-hooks/generator/issues"
 	},
 	"dependencies": {
 		"json-schema-to-typescript": "^7.1"
@@ -18,5 +18,5 @@
 	"scripts": {
 		"generate-interfaces": "json2ts --input schema.json --output=interface/index.d.ts"
 	},
-	"homepage": "https://github.com/johnbillion/wp-hooks-generator#readme"
+	"homepage": "https://github.com/wp-hooks/generator#readme"
 }

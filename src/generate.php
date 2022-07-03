@@ -268,7 +268,7 @@ $actions = array_values( array_filter( $output, function( array $hook ) : bool {
 } ) );
 
 $actions = [
-	'$schema' => 'https://raw.githubusercontent.com/johnbillion/wp-hooks-generator/0.8.0/schema.json',
+	'$schema' => 'https://raw.githubusercontent.com/wp-hooks/generator/0.8.0/schema.json',
 	'hooks' => $actions,
 ];
 
@@ -280,7 +280,7 @@ $filters = array_values( array_filter( $output, function( array $hook ) : bool {
 } ) );
 
 $filters = [
-	'$schema' => 'https://raw.githubusercontent.com/johnbillion/wp-hooks-generator/0.8.0/schema.json',
+	'$schema' => 'https://raw.githubusercontent.com/wp-hooks/generator/0.8.0/schema.json',
 	'hooks' => $filters,
 ];
 

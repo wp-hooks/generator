@@ -8,7 +8,9 @@ Note: If you just want the hook files without generating them yourself, use the 
 
 ## Installation
 
-    composer require johnbillion/wp-hooks-generator
+```shell
+composer require wp-hooks/generator
+```
 
 ## Generating the Hook Files
 

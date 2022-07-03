@@ -1,5 +1,5 @@
 {
-	"name": "johnbillion/wp-hooks-generator",
+	"name": "wp-hooks/generator",
 	"description": "Generates a JSON representation of the WordPress actions and filters in your code",
 	"type": "library",
 	"license": "GPL-3.0-or-later",
