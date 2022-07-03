@@ -4,7 +4,7 @@ Generates a JSON representation of the WordPress actions and filters in your cod
 
 Note: If you just want the hook files without generating them yourself, use the following packages instead:
 
-* [johnbillion/wp-hooks](https://github.com/johnbillion/wp-hooks) for WordPress core
+* [wp-hooks/wordpress-core](https://github.com/wp-hooks/wordpress-core) for WordPress core
 
 ## Installation
 

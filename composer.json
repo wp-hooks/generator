@@ -27,5 +27,14 @@
 	"require-dev": {
 		"oomphinc/composer-installers-extender": "^2",
 		"opis/json-schema": "^1"
+	},
+	"funding": [
+		{
+			"type": "github",
+			"url": "https://github.com/sponsors/johnbillion"
+		}
+	],
+	"replace": {
+		"johnbillion/wp-hooks-generator": "*"
 	}
 }
