@@ -126,9 +126,17 @@ function hooks_parse_files( array $files, string $root, array $ignore_hooks ) : 
 			$file_hooks = array_merge( $file_hooks, export_hooks( $file->uses['hooks'], $path ) );
 		}
 
+		if ( ! empty( $file->uses['functions'] ) ) {
+			$file_hooks = array_merge( $file_hooks, export_scheduled_hooks( $file->uses['functions'], $path ) );
+		}
+
 		foreach ( $file->getFunctions() as $function ) {
 			if ( ! empty( $function->uses ) && ! empty( $function->uses['hooks'] ) ) {
 				$file_hooks = array_merge( $file_hooks, export_hooks( $function->uses['hooks'], $path ) );
+			}
+
+			if ( ! empty( $function->uses ) && ! empty( $function->uses['functions'] ) ) {
+				$file_hooks = array_merge( $file_hooks, export_scheduled_hooks( $function->uses['functions'], $path ) );
 			}
 		}
 
@@ -136,6 +144,10 @@ function hooks_parse_files( array $files, string $root, array $ignore_hooks ) : 
 			foreach ( $class->getMethods() as $method ) {
 				if ( ! empty( $method->uses ) && ! empty( $method->uses['hooks'] ) ) {
 					$file_hooks = array_merge( $file_hooks, export_hooks( $method->uses['hooks'], $path ) );
+				}
+
+				if ( ! empty( $method->uses ) && ! empty( $method->uses['functions'] ) ) {
+					$file_hooks = array_merge( $file_hooks, export_scheduled_hooks( $method->uses['functions'], $path ) );
 				}
 			}
 		}
@@ -165,6 +177,74 @@ function hooks_parse_files( array $files, string $root, array $ignore_hooks ) : 
 	} );
 
 	return $output;
+}
+
+/**
+ * @param \WP_Parser\Function_Call_Reflector[] $nodes Array of hook references.
+ * @param string                               $path  The file path.
+ * @return array<int,array<string,mixed>>
+ */
+function export_scheduled_hooks( array $nodes, string $path ) : array {
+	$out = array();
+
+	$event_functions = [
+		'wp_schedule_event',
+		// WooCommerce action scheduler
+		'as_schedule_recurring_action',
+		'as_schedule_cron_action',
+	];
+
+	$single_event_functions = [
+		'wp_schedule_single_event',
+		// WooCommerce action scheduler
+		'as_schedule_single_action',
+		'as_enqueue_async_action',
+	];
+
+	foreach ( $nodes as $wp_node ) {
+		if ( !$wp_node instanceof \WP_Parser\Function_Call_Reflector ) {
+			continue;
+		}
+
+		$origNode = $wp_node->getNode();
+
+		// same code used in psalm-plugin-wordpress
+		if ( $origNode instanceof \PhpParser\Node\Expr\FuncCall && $origNode->name instanceof \PhpParser\Node\Name ) {
+			if ( in_array( (string) $origNode->name, $event_functions, true ) ) {
+				$hook_type = 'cron-action';
+				// the 3rd arg (index key 2) is the hook name
+				$hook_index = 2;
+			} elseif ( in_array( (string) $origNode->name, $single_event_functions, true ) ) {
+				$hook_type = 'cron-action';
+				$hook_index = 1;
+
+				if ( (string) $origNode->name === 'as_enqueue_async_action' ) {
+					$hook_index = 0;
+				}
+			} else {
+				continue;
+			}
+
+			if ( ! $origNode->args[ $hook_index ]->value instanceof \PhpParser\Node\Scalar\String_ ) {
+				continue;
+			}
+
+			$out[] = array(
+				'name'     => $origNode->args[ $hook_index ]->value->value,
+				'file'     => $path,
+				'type'     => 'action',
+				'doc'      => array(
+					'description' =>'',
+					'long_description' => '',
+					'tags' => array(),
+					'long_description_html' => '',
+				),
+				'args'     => 0,
+			);
+		}
+	}
+
+	return $out;
 }
 
 /**
