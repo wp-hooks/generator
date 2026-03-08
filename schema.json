@@ -62,7 +62,9 @@
 							"action",
 							"filter",
 							"action_reference",
-							"filter_reference"
+							"filter_reference",
+                            "action_deprecated",
+                            "filter_deprecated"
 						]
 					},
 					"doc": {
