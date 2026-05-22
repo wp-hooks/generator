@@ -348,7 +348,12 @@ function hooks_parse_files( array $files, string $root, array $ignore_hooks ) : 
 				} elseif ( $tag instanceof \phpDocumentor\Reflection\DocBlock\Tags\Deprecated ) {
 					$tag_data['content'] = (string) $tag;
 				} elseif ( $tag instanceof \phpDocumentor\Reflection\DocBlock\Tags\Param ) {
-					$tag_data['types'] = explode( '|', (string) $tag->getType() );
+					$type = $tag->getType();
+					if ( $type instanceof \phpDocumentor\Reflection\Types\Compound ) {
+						$tag_data['types'] = array_map( 'strval', iterator_to_array( $type ) );
+					} else {
+						$tag_data['types'] = [ (string) $type ];
+					}
 					$tag_data['variable'] = '$' . $tag->getVariableName();
 
 					$markdown = \Parsedown::instance();
