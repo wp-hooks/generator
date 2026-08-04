@@ -12,7 +12,7 @@ use Opis\JsonSchema\{
 
 $data = json_decode(file_get_contents( $argv[1] ));
 $validator = new Validator();
-$id = 'https://github.com/wp-hooks/generator/blob/1.0.2/schema.json';
+$id = 'https://github.com/wp-hooks/generator/blob/1.1.0/schema.json';
 $validator->resolver()->registerFile(
 	$id,
 	'schema.json',
