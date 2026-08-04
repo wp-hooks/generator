@@ -20,11 +20,12 @@ $options = getopt( '', [
 	"output:",
 	"ignore-files::",
 	"ignore-hooks::",
+	"include-deprecated",
 ] );
 
 if ( empty( $options['input' ] ) || empty( $options['output'] ) ) {
 	printf(
-		"Usage: %s --input=src --output=hooks [--ignore-files=ignore/this,ignore/that] [--ignore-hooks=this_hook,that_hook] \n",
+		"Usage: %s --input=src --output=hooks [--ignore-files=ignore/this,ignore/that] [--ignore-hooks=this_hook,that_hook] [--include-deprecated] \n",
 		$argv[0]
 	);
 	exit( 1 );
@@ -40,6 +41,9 @@ if ( ! empty( $options['ignore-hooks'] ) ) {
 	$options['ignore-hooks'] = explode( ',', $options['ignore-hooks'] );
 }
 
+// getopt() sets the value to false for valueless flags, so check for array key existence and the false value.
+$options['include-deprecated'] = array_key_exists( 'include-deprecated', $options ) && false === $options['include-deprecated'];
+
 $config = ( file_exists( 'composer.json' ) ? json_decode( file_get_contents( 'composer.json' ) ) : false );
 
 if ( ! empty( $config ) && ! empty( $config->extra ) && ! empty( $config->extra->{"wp-hooks"} ) ) {
@@ -51,6 +55,11 @@ if ( ! empty( $config ) && ! empty( $config->extra ) && ! empty( $config->extra-
 	// Read ignore-hooks from Composer config:
 	if ( empty( $options['ignore-hooks'] ) && ! empty( $config->extra->{"wp-hooks"}->{"ignore-hooks"} ) ) {
 		$options['ignore-hooks'] = array_values( $config->extra->{"wp-hooks"}->{"ignore-hooks"} );
+	}
+
+	// Read include-deprecated from Composer config:
+	if ( empty( $options['include-deprecated'] ) && ! empty( $config->extra->{"wp-hooks"}->{"include-deprecated"} ) ) {
+		$options['include-deprecated'] = true;
 	}
 }
 
@@ -66,6 +75,7 @@ $source_dir = $options['input'];
 $target_dir = $options['output'];
 $ignore_files = $options['ignore-files'];
 $ignore_hooks = $options['ignore-hooks'];
+$include_deprecated = $options['include-deprecated'];
 
 if ( ! file_exists( $source_dir ) ) {
 	printf(
@@ -192,9 +202,10 @@ class DocblockFinderVisitor extends FindingVisitor {
  * @param array<int,string> $files
  * @param string            $root
  * @param array<int,string> $ignore_hooks
+ * @param bool              $include_deprecated
  * @return array
  */
-function hooks_parse_files( array $files, string $root, array $ignore_hooks ) : array {
+function hooks_parse_files( array $files, string $root, array $ignore_hooks, bool $include_deprecated = false ) : array {
 	$output = array();
 
 	// Create a new parser instance
@@ -206,6 +217,15 @@ function hooks_parse_files( array $files, string $root, array $ignore_hooks ) : 
 		'do_action_ref_array',
 		'apply_filters_ref_array',
 	];
+
+	$deprecated_funcs = [
+		'do_action_deprecated',
+		'apply_filters_deprecated',
+	];
+
+	if ( $include_deprecated ) {
+		$funcs = array_merge( $funcs, $deprecated_funcs );
+	}
 
 	foreach ( $files as $filename ) {
 		// Parse the PHP file
@@ -248,6 +268,8 @@ function hooks_parse_files( array $files, string $root, array $ignore_hooks ) : 
 				continue;
 			}
 
+			$is_deprecated_hook = in_array( $funcNameStr, $deprecated_funcs, true );
+
 			$docblock = $expr->getDocComment();
 
 			if ( $docblock && str_starts_with($docblock->getText(), '/** This action is documented in') ) {
@@ -281,7 +303,13 @@ function hooks_parse_files( array $files, string $root, array $ignore_hooks ) : 
 					$filename,
 				);
 
-				continue;
+				// Deprecated hooks may use the deprecated function arguments to convey the 
+				// deprecation details, so we want to keep those docs in the output.
+				if ( ! $is_deprecated_hook ) {
+					continue;
+				}
+
+				$docblock = new Doc( '/** This hook is deprecated. */' );
 			}
 
 			$dbt = $docblock ? $docblock->getText() : '';
@@ -445,10 +473,60 @@ function hooks_parse_files( array $files, string $root, array $ignore_hooks ) : 
 				case 'apply_filters_ref_array':
 					$out['type'] = 'filter_reference';
 					break;
+				case 'do_action_deprecated':
+					$out['type'] = 'action_deprecated';
+					break;
+				case 'apply_filters_deprecated':
+					$out['type'] = 'filter_deprecated';
+					break;
+			}
+
+			if ( $is_deprecated_hook ) {
+				// Deprecated hooks are fired via either `do_action_deprecated()` or `apply_filters_deprecated()`,
+				// which specify deprecation details in the arguments.
+				$version = get_literal_arg( $expr, 2 );
+
+				if ( null === $version ) {
+					echo sprintf(
+						"Deprecated hook '%s' in file '%s' is missing a version.\n",
+						$hook_name,
+						$filename,
+					);
+				}
+
+				$out['deprecated_version'] = $version ?? '';
+
+				$replacement = get_literal_arg( $expr, 3 );
+
+				if ( null !== $replacement ) {
+					$out['deprecated_replacement'] = $replacement;
+				}
+
+				$message = get_literal_arg( $expr, 4 );
+
+				if ( null !== $message ) {
+					$out['deprecated_message'] = $message;
+				}
 			}
 
 			$out['doc'] = $doc;
-			$out['args'] = count( $expr->args ) - 1;
+
+			if ( $is_deprecated_hook ) {
+				// The hook arguments are passed as an array in the second argument, so the
+				// argument count comes from that array rather than from the call itself.
+				$out['args'] = count_array_arg( $expr, 1 );
+				if ( null === $out['args'] ) {
+					$param_tags = array_filter(
+						$tags,
+						function( array $tag ) : bool {
+							return 'param' === $tag['name'];
+						}
+					);
+					$out['args'] = count( $param_tags );
+				}
+			} else {
+				$out['args'] = count( $expr->args ) - 1;
+			}
 
 			$output[] = $out;
 		}
@@ -459,6 +537,67 @@ function hooks_parse_files( array $files, string $root, array $ignore_hooks ) : 
 	} );
 
 	return $output;
+}
+
+/**
+ * Get the value of a positional argument within a function call.
+ *
+ * Quotes around string literals are stripped. Anything that isn't a literal, such as a constant or a
+ * variable, is returned as its printed source code. Returns null when the argument isn't present, is
+ * empty, or is passed by name.
+ *
+ * @param Node\Expr\FuncCall $expr
+ * @param int                $index
+ *
+ * @return string|null
+ */
+function get_literal_arg( Node\Expr\FuncCall $expr, int $index ) : ?string {
+	$arg = $expr->args[ $index ] ?? null;
+
+	// Named arguments and first class callable syntax are not supported.
+	if ( ! ( $arg instanceof Node\Arg ) || null !== $arg->name ) {
+		return null;
+	}
+
+	$printer = new Standard();
+	$value = $printer->prettyPrintExpr( $arg->value );
+	// Check for an edge case where we have "'text'". We want to keep the inner quote characters.
+	$value = preg_replace( '/^"(\'.+\')"$/', '$1', $value, -1, $wrapped_quote_count );
+	if ( 0 === $wrapped_quote_count ) {
+		$value = preg_replace( '/^"(.*)"$/', '$1', $value );
+		$value = preg_replace( "/^'(.*)'$/", '$1', $value );
+	}
+
+	if ( '' === $value ) {
+		return null;
+	}
+
+	return $value;
+}
+
+/**
+ * Count the number of array elements for a positional argument within a function call.
+ *
+ * Returns null when the argument isn't present or isn't an array literal, for example
+ * when a variable is passed instead.
+ *
+ * @param Node\Expr\FuncCall $expr
+ * @param int                $index
+ *
+ * @return int|null
+ */
+function count_array_arg( Node\Expr\FuncCall $expr, int $index ) : ?int {
+	$arg = $expr->args[ $index ] ?? null;
+
+	if ( ! ( $arg instanceof Node\Arg ) || null !== $arg->name ) {
+		return null;
+	}
+
+	if ( ! ( $arg->value instanceof Node\Expr\Array_ ) ) {
+		return null;
+	}
+
+	return count( $arg->value->items );
 }
 
 /**
@@ -486,15 +625,15 @@ function parse_aliases( string $html ) : array {
 	return $aliases;
 }
 
-$output = hooks_parse_files( $files, $source_dir, $ignore_hooks );
+$output = hooks_parse_files( $files, $source_dir, $ignore_hooks, $include_deprecated );
 
 // Actions
 $actions = array_values( array_filter( $output, function( array $hook ) : bool {
-	return in_array( $hook['type'], [ 'action', 'action_reference' ], true );
+	return in_array( $hook['type'], [ 'action', 'action_reference', 'action_deprecated' ], true );
 } ) );
 
 $actions = [
-	'$schema' => 'https://raw.githubusercontent.com/wp-hooks/generator/1.0.2/schema.json',
+	'$schema' => 'https://raw.githubusercontent.com/wp-hooks/generator/1.1.0/schema.json',
 	'hooks' => $actions,
 ];
 
@@ -502,11 +641,11 @@ $result = file_put_contents( $target_dir . '/actions.json', json_encode( $action
 
 // Filters
 $filters = array_values( array_filter( $output, function( array $hook ) : bool {
-	return in_array( $hook['type'], [ 'filter', 'filter_reference' ], true );
+	return in_array( $hook['type'], [ 'filter', 'filter_reference', 'filter_deprecated' ], true );
 } ) );
 
 $filters = [
-	'$schema' => 'https://raw.githubusercontent.com/wp-hooks/generator/1.0.2/schema.json',
+	'$schema' => 'https://raw.githubusercontent.com/wp-hooks/generator/1.1.0/schema.json',
 	'hooks' => $filters,
 ];
 

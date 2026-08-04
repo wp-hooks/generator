@@ -62,7 +62,9 @@
 							"action",
 							"filter",
 							"action_reference",
-							"filter_reference"
+							"filter_reference",
+							"action_deprecated",
+							"filter_deprecated"
 						]
 					},
 					"doc": {
@@ -169,6 +171,27 @@
 					"args": {
 						"description": "The number of arguments passed to the hook",
 						"type": "integer"
+					},
+					"deprecated_version": {
+						"description": "The version the hook was deprecated in, for deprecated hooks",
+						"type": "string",
+						"examples": [
+							"4.6.0"
+						]
+					},
+					"deprecated_replacement": {
+						"description": "The name of the hook that should be used instead, for deprecated hooks",
+						"type": "string",
+						"examples": [
+							"document_title"
+						]
+					},
+					"deprecated_message": {
+						"description": "The message to accompany the deprecation notice, for deprecated hooks",
+						"type": "string",
+						"examples": [
+							"Use the document_title filter instead."
+						]
 					}
 				}
 			}
