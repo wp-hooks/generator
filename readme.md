@@ -98,6 +98,38 @@ You can ignore hooks in two ways:
 }
 ```
 
+## Including Deprecated Hooks
+
+Hooks fired via `do_action_deprecated()` and `apply_filters_deprecated()` are omitted by default. You can include them in two ways:
+
+### On the Command Line
+
+    ./vendor/bin/wp-hooks-generator --input=src --output=hooks --include-deprecated
+
+### In composer.json
+
+```json
+"extra": {
+    "wp-hooks": {
+        "include-deprecated": true
+    }
+}
+```
+
+Deprecated hooks are written to `actions.json` and `filters.json` alongside the other hooks, with a type of `action_deprecated` or `filter_deprecated` so they can be identified:
+
+```php
+$deprecated = array_filter( $filters, function( array $hook ) : bool {
+    return ( 'filter_deprecated' === $hook['type'] );
+} );
+```
+
+They also carry the deprecation information passed to the function call:
+
+* `deprecated_version`: The version the hook was deprecated in.
+* `deprecated_replacement`: The name of the hook that should be used instead, if one was given.
+* `deprecated_message`: The message that accompanies the deprecation notice, if one was given.
+
 ## TypeScript Interfaces for the Hook Files
 
 The TypeScript interfaces for the hook files can be found in [`interface/index.d.ts`](interface/index.d.ts). Usage:
