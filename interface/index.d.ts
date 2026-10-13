@@ -49,6 +49,18 @@ export interface Hook {
    * The number of arguments passed to the hook
    */
   args: number;
+  /**
+   * The version the hook was deprecated in, for deprecated hooks
+   */
+  deprecated_version?: string;
+  /**
+   * The name of the hook that should be used instead, for deprecated hooks
+   */
+  deprecated_replacement?: string;
+  /**
+   * The message to accompany the deprecation notice, for deprecated hooks
+   */
+  deprecated_message?: string;
 }
 /**
  * The docblock information for the hook
