@@ -165,8 +165,37 @@ function fix_newlines( $text ) {
 	return $text;
 }
 
+const HOOK_FUNCTIONS = [
+	'do_action',
+	'apply_filters',
+	'do_action_ref_array',
+	'apply_filters_ref_array',
+];
+
 class DocblockFinderVisitor extends FindingVisitor {
 	private ?Doc $latest_comment = null;
+
+	/**
+	 * Stack of statements enclosing the current node.
+	 *
+	 * @var array<int,Node\Stmt>
+	 */
+	private array $stmt_stack = [];
+
+	/**
+	 * Statements whose docblock has already been given to a hook call within them.
+	 *
+	 * @var \SplObjectStorage<Node\Stmt,null>
+	 */
+	private \SplObjectStorage $used_stmt_docblocks;
+
+	public function beforeTraverse(array $nodes): ?array {
+		$this->stmt_stack = [];
+		$this->used_stmt_docblocks = new \SplObjectStorage();
+		$this->latest_comment = null;
+
+		return parent::beforeTraverse($nodes);
+	}
 
 	public function enterNode(Node $node) {
 		$comment = $node->getDocComment();
@@ -179,12 +208,58 @@ class DocblockFinderVisitor extends FindingVisitor {
 		if ($filterCallback($node)) {
 			if ( $this->latest_comment && $this->latest_comment->getEndLine() + 1 === $node->getStartLine() ) {
 				$node->setDocComment($this->latest_comment);
+			} else {
+				$this->maybe_use_stmt_docblock( $node );
 			}
 
 			$this->foundNodes[] = $node;
 		}
 
+		if ( $node instanceof Node\Stmt ) {
+			$this->stmt_stack[] = $node;
+		}
+
 		return null;
+	}
+
+	public function leaveNode(Node $node) {
+		if ( $node instanceof Node\Stmt ) {
+			array_pop( $this->stmt_stack );
+		}
+
+		return null;
+	}
+
+	/**
+	 * Handles a hook call inside a multi-line statement expression where the docblock sits above the
+	 * statement rather than directly above the call, for example within a multi-line `if` condition.
+	 *
+	 * Only the nearest enclosing statement is considered, so a call inside a statement body does not
+	 * inherit the docblock of the control structure or function around it.
+	 */
+	private function maybe_use_stmt_docblock( Node $node ): void {
+		if ( ! ( $node instanceof Node\Expr\FuncCall ) || ! ( $node->name instanceof Node\Name ) ) {
+			return;
+		}
+
+		if ( ! in_array( $node->name->toString(), HOOK_FUNCTIONS, true ) ) {
+			return;
+		}
+
+		$stmt = end( $this->stmt_stack );
+
+		if ( ! $stmt || $this->used_stmt_docblocks->contains( $stmt ) ) {
+			return;
+		}
+
+		$comment = $stmt->getDocComment();
+
+		if ( ! $comment || $comment->getEndLine() + 1 !== $stmt->getStartLine() ) {
+			return;
+		}
+
+		$node->setDocComment( $comment );
+		$this->used_stmt_docblocks->attach( $stmt );
 	}
 }
 
@@ -199,13 +274,6 @@ function hooks_parse_files( array $files, string $root, array $ignore_hooks ) : 
 
 	// Create a new parser instance
 	$parser = ( new ParserFactory() )->createForNewestSupportedVersion();
-
-	$funcs = [
-		'do_action',
-		'apply_filters',
-		'do_action_ref_array',
-		'apply_filters_ref_array',
-	];
 
 	foreach ( $files as $filename ) {
 		// Parse the PHP file
@@ -244,7 +312,7 @@ function hooks_parse_files( array $files, string $root, array $ignore_hooks ) : 
 
 			$funcNameStr = $funcName->toString();
 
-			if ( ! in_array( $funcNameStr, $funcs, true ) ) {
+			if ( ! in_array( $funcNameStr, HOOK_FUNCTIONS, true ) ) {
 				continue;
 			}
 
@@ -262,6 +330,25 @@ function hooks_parse_files( array $files, string $root, array $ignore_hooks ) : 
 			$hook_name = $printer->prettyPrintExpr( $expr->args[0]->value );
 			$hook_name = preg_replace( '/^"(.*)"$/', '$1', $hook_name );
 			$hook_name = preg_replace( "/^'(.*)'$/", '$1', $hook_name );
+
+			// Hook names that core builds with a function call.
+			$computed_hook_names = [
+				'wp_get_entity_view_config_hook_name($kind, $name)' => 'get_entity_view_config_{$kind}_{$name}',
+			];
+
+			$hook_name = $computed_hook_names[ $hook_name ] ?? $hook_name;
+
+			// Dynamic hook names that only ever resolve to one fixed name in a given file. Keyed by file
+			// because the same dynamic name is used elsewhere with different values.
+			$fixed_hook_names = [
+				'wp-admin/includes/class-wp-application-passwords-list-table.php' => [
+					'manage_{$this->screen->id}_custom_column' => 'manage_application-passwords-user_custom_column',
+					'manage_{$this->screen->id}_custom_column_js_template' => 'manage_application-passwords-user_custom_column_js_template',
+				],
+			];
+
+			$relative_filename = str_replace( "{$root}/", '', $filename );
+			$hook_name = $fixed_hook_names[ $relative_filename ][ $hook_name ] ?? $hook_name;
 
 			if ( in_array( $hook_name, $ignore_hooks, true ) ) {
 				continue;
